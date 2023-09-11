@@ -1,17 +1,13 @@
 #include <regex>
 #include <iostream>
 #include <vector>
-#include <string>
 
 int main()
 {
-    std::string a = "a\nb";
 
-    for (char b : a)
+
+    if ('\0' == '\n')
     {
-        if (b == '\n')
-        {
-            std::cout << "newline\n";
-        };
-    };    
+        std::cout << "newline is null\n";
+    };
 };

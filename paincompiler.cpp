@@ -9,15 +9,17 @@ class Token
 {
     public:
 
-    int i_type;
+    int i_type; // 1:keyword 2:intliteral 3:separator 4:operator
     std::string s_type;
     std::string name;
+    bool assigned = false;
 
     void mkToken(int t_type, std::string t_name, std::string str_type)
     {
         i_type = t_type;
         name = t_name;
         s_type = str_type;
+        assigned = true;
     };
 };
 
@@ -34,6 +36,11 @@ class Tokenizer
         m_src = str_file;
     };
 
+    void printContents()
+    {
+        std::cout << m_src << std::endl;
+    };
+
     std::vector<Token> tokenize()
     {
         m_index = 0;
@@ -42,8 +49,12 @@ class Tokenizer
 
         while(!(isEOF()))
         {
-            std::cout << m_src.at(m_index) << std::endl;
+            std::cout << m_src.at(m_index);
             Token new_token;
+            if (m_src.at(m_index) == '\n') {
+                new_token.mkToken(3, "newline", "separator");
+                m_index++;
+            } else 
             if (std::isalpha(m_src.at(m_index)))    // IDENTIFIER + Keywords
             {
                 buffer.push_back(consume());
@@ -64,16 +75,25 @@ class Tokenizer
 
                 new_token.mkToken(2, buffer, "int literal");
             } else
-            if (m_src[m_index] == '\n')
+            if (m_src.at(m_index) == '/' && !(isEOF()) && peak() == '/') 
             {
-                std::cout << "cum";
-                new_token.mkToken(3, "newline", "separator");
-            } else {
-                std::cout << "cum";
+                m_index += 2;
+                new_token.mkToken(4, "//", "operator");
+            } else 
+            {
+                if (m_src.at(m_index) != ' ')
+                {
+                buffer.push_back(consume());
+                new_token = assertToken(buffer);
+                }
+                std::cout << "empchar";
+                m_index++;
+            }
+            if (new_token.assigned)
+            {
+                tokens.push_back(new_token);
             };
-            tokens.push_back(new_token);
             buffer = "";
-            m_index++;
         };
 
         std::cout << "Finished Tokenization.\n";
@@ -90,21 +110,34 @@ class Tokenizer
     private:
 
     std::vector<std::string> keyword_names = {"return", "int"};
+    std::vector<std::string> operator_names = {"=", "+"};
 
     int m_index;
     std::string m_src;
 
     Token assertToken(std::string buffer)
     {
+
+        std::cout << "\nAsserted: " << buffer << '\n';
         Token new_token;
         for (std::string keyword : keyword_names)
         {
             if (keyword == buffer)
             {
                 new_token.mkToken(1, keyword, "keyword");
-                return new_token;         
+                return new_token;
             };
         };
+
+        for (std::string op : operator_names)
+        {
+            if (op == buffer)
+            {
+                new_token.mkToken(4, op, "operator");
+                return new_token;
+            };
+        };
+
         new_token.mkToken(0, buffer, "identifier");
         return new_token;
     };
@@ -131,6 +164,62 @@ class Tokenizer
     };
 };
 
+class Node
+{
+    public:
+
+    bool exists = false;
+
+    int type;
+    std::vector<Node> children;
+
+    Node()
+    {
+        type = 0;
+    };
+
+    Node(int n_type)
+    {
+        type = n_type;
+    };
+
+    void giveChild(Node child)
+    {
+        children.push_back(child);
+    };
+
+};
+
+class AST
+{
+    private:
+
+    Node start_node;
+
+    bool p_isEscape(Token token)
+    {
+        if (token.)
+    };
+
+    void p_genTree(std::vector<Token> tokens, Node parent_token)
+    {
+        for (Token token : tokens)
+        {
+
+        };
+    };
+
+
+
+    public:
+
+    void makeTree(std::vector<Token> tokens)
+    {
+        p_genTree(tokens, start_node);
+    };
+
+};
+
 std::string getStringFromFile(std::string filename)
 {
     std::ifstream file;
@@ -141,14 +230,13 @@ std::string getStringFromFile(std::string filename)
     std::string content;
 
     while (std::getline(file, content)) {
-        contents += content;
+        contents += content + '\n';
     }
 
     file.close();
 
     return contents;
 };
-
 
 int main(int argc, char* argv[])
 {
